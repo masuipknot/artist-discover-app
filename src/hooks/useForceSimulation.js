@@ -52,9 +52,12 @@ export function useForceSimulation(graph, width, height) {
       .on('tick', () => {
         setFrame({
           nodes: nodes.map((n) => ({ ...n })),
+          // forceLink() rewrites l.source/l.target from id strings to node
+          // object references once the simulation initializes — normalize
+          // back to ids so NetworkGraph can look nodes up by id.
           links: links.map((l) => ({
-            source: l.source,
-            target: l.target,
+            source: typeof l.source === 'object' ? l.source.id : l.source,
+            target: typeof l.target === 'object' ? l.target.id : l.target,
           })),
         });
       });
