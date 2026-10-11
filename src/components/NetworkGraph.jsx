@@ -46,6 +46,7 @@ export default function NetworkGraph({ graph, width, height, onSelectArtist }) {
               strokeWidth={1.5}
             />
             <text
+              className="node-label"
               y={node.center ? -18 : -14}
               textAnchor="middle"
               fontSize={node.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE}

@@ -4,16 +4,12 @@ import {
   forceManyBody,
   forceRadial,
 } from 'd3-force';
-import {
-  MIN_DISTANCE,
-  MAX_DISTANCE,
-  CENTER_FONT_SIZE,
-  NODE_FONT_SIZE,
-} from '../config.js';
+import { MAX_DISTANCE, CENTER_FONT_SIZE, NODE_FONT_SIZE } from '../config.js';
 import {
   estimateTextWidth,
   forceLabelCollide,
 } from '../lib/forceLabelCollide.js';
+import { placeNodes } from '../lib/initialLayout.js';
 
 // Space kept free below the graph for the search bar, and around the edges for
 // labels.
@@ -37,23 +33,7 @@ export function useForceSimulation(graph, width, height) {
     const available = Math.min(cx - SIDE_MARGIN, cy - TOP_MARGIN);
     const scale = Math.min(1, Math.max(available, 1) / MAX_DISTANCE);
 
-    const related = graph.nodes.filter((n) => !n.center);
-    const nodes = graph.nodes.map((n) => {
-      if (n.center) {
-        return { ...n, x: cx, y: cy, fx: cx, fy: cy, targetRadius: 0 };
-      }
-      const targetRadius =
-        (MIN_DISTANCE + (1 - n.matchNorm) * (MAX_DISTANCE - MIN_DISTANCE)) * scale;
-      // Even angular spread; start closer in so nodes drift outward on load.
-      const angle = (related.indexOf(n) / related.length) * Math.PI * 2 - Math.PI / 2;
-      const startRadius = targetRadius * 0.5;
-      return {
-        ...n,
-        targetRadius,
-        x: cx + Math.cos(angle) * startRadius,
-        y: cy + Math.sin(angle) * startRadius,
-      };
-    });
+    const nodes = placeNodes(graph, { cx, cy, scale });
 
     const simulation = forceSimulation(nodes)
       .force('radial', forceRadial((d) => d.targetRadius, cx, cy).strength(0.6))

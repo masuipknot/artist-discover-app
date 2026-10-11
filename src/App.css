@@ -20,6 +20,12 @@
   pointer-events: none;
 }
 
+.node-label {
+  stroke: var(--bg);
+  stroke-width: 4px;
+  paint-order: stroke; /* draw the outline behind the glyphs */
+}
+
 .empty-state {
   position: absolute;
   inset: 0;
