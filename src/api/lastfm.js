@@ -32,9 +32,10 @@ export async function searchArtists(query, limit = 8) {
   return matches.map((a) => a.name);
 }
 
-// artist.getSimilar — used to build the network.
-export async function getSimilarArtists(name, limit = 6) {
+// artist.getSimilar — used to build the network. `match` comes back as a
+// string (e.g. "0.453359"), so convert it to a number here.
+export async function getSimilarArtists(name, limit) {
   const data = await request({ method: 'artist.getSimilar', artist: name, limit });
   const similar = toArray(data?.similarartists?.artist);
-  return similar.map((a) => a.name);
+  return similar.map((a) => ({ name: a.name, match: Number(a.match) || 0 }));
 }

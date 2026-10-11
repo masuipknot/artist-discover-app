@@ -28,7 +28,8 @@ Last.fm の API キーは https://www.last.fm/api/account/create で取得でき
 
 ## 設計メモ
 
-- 表示する関連アーティスト数: 6
+- 表示する関連アーティスト数: `src/config.js` の `RELATED_COUNT`(初期値 15。`getSimilar` の limit に使用)
+- 中心からの距離: `match` を min-max 正規化し、`MIN_DISTANCE`〜`MAX_DISTANCE`(`src/config.js`)に変換して `forceRadial` で制御。関連度が高いほど近い。小さい画面では自動で縮小
 - ノード識別子は `name`
 - 線は中心 → 周辺のみ描画(周辺同士の関連線は描画しない。デザイン上シンプルにするため)
 - API 呼び出しは検索ごとに `getSimilar` 1 回。検索中はローディング表示

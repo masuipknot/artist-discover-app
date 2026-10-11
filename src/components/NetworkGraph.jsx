@@ -1,4 +1,5 @@
 import { useForceSimulation } from '../hooks/useForceSimulation.js';
+import { CENTER_FONT_SIZE, NODE_FONT_SIZE } from '../config.js';
 
 export default function NetworkGraph({ graph, width, height, onSelectArtist }) {
   const frame = useForceSimulation(graph, width, height);
@@ -47,7 +48,7 @@ export default function NetworkGraph({ graph, width, height, onSelectArtist }) {
             <text
               y={node.center ? -18 : -14}
               textAnchor="middle"
-              fontSize={node.center ? 15 : 12}
+              fontSize={node.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE}
               fontWeight={node.center ? 600 : 400}
               fill="var(--fg)"
             >

@@ -1,68 +1,80 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   forceSimulation,
-  forceLink,
   forceManyBody,
-  forceCenter,
-  forceCollide,
+  forceRadial,
 } from 'd3-force';
+import {
+  MIN_DISTANCE,
+  MAX_DISTANCE,
+  CENTER_FONT_SIZE,
+  NODE_FONT_SIZE,
+} from '../config.js';
+import {
+  estimateTextWidth,
+  forceLabelCollide,
+} from '../lib/forceLabelCollide.js';
 
-// Runs a d3-force simulation over the given nodes/links and returns a ticking
-// snapshot of positions. d3 mutates the node objects, so we clone the input.
+// Space kept free below the graph for the search bar, and around the edges for
+// labels.
+const BOTTOM_RESERVE = 90;
+const SIDE_MARGIN = 70;
+const TOP_MARGIN = 30;
+
+// Runs a d3-force simulation and returns a ticking snapshot of positions.
+// Distance from the center is driven by forceRadial (higher match = closer);
+// d3 mutates the node objects, so the input is cloned.
 export function useForceSimulation(graph, width, height) {
   const [frame, setFrame] = useState({ nodes: [], links: [] });
-  const simRef = useRef(null);
 
   useEffect(() => {
     if (!graph || !width || !height) return undefined;
 
     const cx = width / 2;
-    const cy = height / 2;
-    const radius = Math.min(width, height) * 0.3;
+    const cy = (height - BOTTOM_RESERVE) / 2;
 
-    const peripherals = graph.nodes.filter((n) => !n.center);
-    const nodes = graph.nodes.map((n, i) => {
+    // Scale distances down on small screens so MAX_DISTANCE still fits.
+    const available = Math.min(cx - SIDE_MARGIN, cy - TOP_MARGIN);
+    const scale = Math.min(1, Math.max(available, 1) / MAX_DISTANCE);
+
+    const related = graph.nodes.filter((n) => !n.center);
+    const nodes = graph.nodes.map((n) => {
       if (n.center) {
-        return { ...n, x: cx, y: cy };
+        return { ...n, x: cx, y: cy, fx: cx, fy: cy, targetRadius: 0 };
       }
-      // Even angular spread on a circle as an initial-position hint.
-      const idx = peripherals.indexOf(n);
-      const angle = (idx / peripherals.length) * Math.PI * 2 - Math.PI / 2;
+      const targetRadius =
+        (MIN_DISTANCE + (1 - n.matchNorm) * (MAX_DISTANCE - MIN_DISTANCE)) * scale;
+      // Even angular spread; start closer in so nodes drift outward on load.
+      const angle = (related.indexOf(n) / related.length) * Math.PI * 2 - Math.PI / 2;
+      const startRadius = targetRadius * 0.5;
       return {
         ...n,
-        x: cx + Math.cos(angle) * radius,
-        y: cy + Math.sin(angle) * radius,
+        targetRadius,
+        x: cx + Math.cos(angle) * startRadius,
+        y: cy + Math.sin(angle) * startRadius,
       };
     });
 
-    const links = graph.links.map((l) => ({ ...l }));
-
     const simulation = forceSimulation(nodes)
+      .force('radial', forceRadial((d) => d.targetRadius, cx, cy).strength(0.6))
+      .force('charge', forceManyBody().strength(-80).distanceMax(220))
       .force(
-        'link',
-        forceLink(links)
-          .id((d) => d.id)
-          .distance(radius)
-          .strength(0.2),
+        'collide',
+        forceLabelCollide((d) => {
+          const fontSize = d.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE;
+          return {
+            w: estimateTextWidth(d.name, fontSize) + 12,
+            h: fontSize + 14,
+          };
+        }),
       )
-      .force('charge', forceManyBody().strength(-600))
-      .force('center', forceCenter(cx, cy))
-      .force('collide', forceCollide(48))
-      .alphaDecay(0.02)
+      .alphaDecay(0.03)
       .on('tick', () => {
         setFrame({
           nodes: nodes.map((n) => ({ ...n })),
-          // forceLink() rewrites l.source/l.target from id strings to node
-          // object references once the simulation initializes — normalize
-          // back to ids so NetworkGraph can look nodes up by id.
-          links: links.map((l) => ({
-            source: typeof l.source === 'object' ? l.source.id : l.source,
-            target: typeof l.target === 'object' ? l.target.id : l.target,
-          })),
+          links: graph.links,
         });
       });
-
-    simRef.current = simulation;
 
     return () => {
       simulation.stop();
