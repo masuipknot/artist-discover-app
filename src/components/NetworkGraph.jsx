@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { useForceSimulation } from '../hooks/useForceSimulation.js';
+import { labelHitRect, pickNode } from '../lib/hitTest.js';
 import {
   CENTER_FONT_SIZE,
   NODE_FONT_SIZE,
@@ -6,6 +8,7 @@ import {
   CENTER_LABEL_OFFSET,
   CENTER_DOT_RADIUS,
   NODE_DOT_RADIUS,
+  HIT_RADIUS,
 } from '../config.js';
 
 export default function NetworkGraph({
@@ -16,11 +19,20 @@ export default function NetworkGraph({
   onSelectArtist,
 }) {
   const frame = useForceSimulation(graph, width, height, safeBottom);
+  const svgRef = useRef(null);
 
   const positions = new Map(frame.nodes.map((n) => [n.id, n]));
 
+  // Resolve the tap to the nearest node, not whichever tap area is on top.
+  const handleTap = (e) => {
+    const box = svgRef.current.getBoundingClientRect();
+    const node = pickNode(frame.nodes, e.clientX - box.left, e.clientY - box.top);
+    if (node) onSelectArtist(node.name);
+  };
+
   return (
     <svg
+      ref={svgRef}
       className="network-graph"
       width={width}
       height={height}
@@ -45,31 +57,42 @@ export default function NetworkGraph({
         })}
       </g>
       <g>
-        {frame.nodes.map((node) => (
-          <g
-            key={node.id}
-            transform={`translate(${node.x}, ${node.y})`}
-            className="node"
-            onClick={() => onSelectArtist(node.name)}
-          >
-            <circle
-              r={node.center ? CENTER_DOT_RADIUS : NODE_DOT_RADIUS}
-              fill={node.center ? 'var(--fg)' : 'var(--bg)'}
-              stroke="var(--line-strong)"
-              strokeWidth={1.5}
-            />
-            <text
-              className="node-label"
-              y={node.center ? -CENTER_LABEL_OFFSET : -LABEL_OFFSET}
-              textAnchor="middle"
-              fontSize={node.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE}
-              fontWeight={node.center ? 600 : 400}
-              fill="var(--fg)"
+        {frame.nodes.map((node) => {
+          const hit = labelHitRect(node);
+          return (
+            <g
+              key={node.id}
+              transform={`translate(${node.x}, ${node.y})`}
+              className="node"
+              onClick={handleTap}
             >
-              {node.name}
-            </text>
-          </g>
-        ))}
+              <circle r={HIT_RADIUS} fill="transparent" />
+              <rect
+                x={hit.x}
+                y={hit.y}
+                width={hit.width}
+                height={hit.height}
+                fill="transparent"
+              />
+              <circle
+                r={node.center ? CENTER_DOT_RADIUS : NODE_DOT_RADIUS}
+                fill={node.center ? 'var(--fg)' : 'var(--bg)'}
+                stroke="var(--line-strong)"
+                strokeWidth={1.5}
+              />
+              <text
+                className="node-label"
+                y={node.center ? -CENTER_LABEL_OFFSET : -LABEL_OFFSET}
+                textAnchor="middle"
+                fontSize={node.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE}
+                fontWeight={node.center ? 600 : 400}
+                fill="var(--fg)"
+              >
+                {node.name}
+              </text>
+            </g>
+          );
+        })}
       </g>
     </svg>
   );

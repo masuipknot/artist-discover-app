@@ -41,6 +41,9 @@ export const MAX_ANGLE_JITTER = 0.8;
 export const DISTANCE_JITTER = 0;
 export const MAX_DISTANCE_JITTER = 0.1;
 
+// Radius (px) of the invisible tap area around each node's dot.
+export const HIT_RADIUS = 22;
+
 // Label font sizes (px), shared by rendering and the collision estimate.
 export const CENTER_FONT_SIZE = 15;
 export const NODE_FONT_SIZE = 12;
