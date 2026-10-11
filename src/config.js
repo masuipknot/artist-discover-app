@@ -2,11 +2,24 @@
 // (e.g. 10 / 15 / 20 / 30) to compare layouts; it feeds getSimilar's limit.
 export const RELATED_COUNT = 15;
 
-// Distance from the center (px) for the most / least related artist, tuned for
-// a large screen. On smaller screens the layout scales down so MAX_DISTANCE
-// still fits (see useForceSimulation).
-export const MIN_DISTANCE = 110;
-export const MAX_DISTANCE = 300;
+// Space the search bar takes from the bottom edge of the screen (px): the
+// 24px offset in .search-bar (App.css) + the 44px input. Keep in sync with
+// App.css; the device's bottom safe area is added on top of this at runtime.
+export const INPUT_BAR_HEIGHT = 68;
+
+// Margin kept between the graph and the screen edges / search bar (px).
+export const VIEW_MARGIN = 16;
+
+// The graph is laid out on an ellipse that fits the screen (see viewLayout.js).
+// MAX_ASPECT caps how far it may be stretched: ry <= rx * MAX_ASPECT on tall
+// screens, rx <= ry * MAX_ASPECT on wide ones.
+export const MAX_ASPECT = 1.5;
+
+// Distance of the most / least related artist from the center, as a ratio of
+// the ellipse radii (0 = center, 1 = ellipse edge). Chosen so a 1440x900
+// screen looks like the earlier 110px–300px circle along the short axis.
+export const MIN_RADIUS_RATIO = 0.275;
+export const MAX_RADIUS_RATIO = 0.75;
 
 // Exponent applied to the normalized match before mapping to distance.
 // 1 = linear; < 1 (0.5 = square root) spreads out artists whose match values
@@ -31,3 +44,9 @@ export const MAX_DISTANCE_JITTER = 0.1;
 // Label font sizes (px), shared by rendering and the collision estimate.
 export const CENTER_FONT_SIZE = 15;
 export const NODE_FONT_SIZE = 12;
+
+// Label baseline offset above the node's center (px), and node dot radii.
+export const LABEL_OFFSET = 14;
+export const CENTER_LABEL_OFFSET = 18;
+export const CENTER_DOT_RADIUS = 8;
+export const NODE_DOT_RADIUS = 5;

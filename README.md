@@ -29,7 +29,8 @@ Last.fm の API キーは https://www.last.fm/api/account/create で取得でき
 ## 設計メモ
 
 - 表示する関連アーティスト数: `src/config.js` の `RELATED_COUNT`(初期値 15。`getSimilar` の limit に使用)
-- 中心からの距離: `match` を min-max 正規化したうえで平方根(`DISTANCE_CURVE = 0.5`)を通し、`MIN_DISTANCE`〜`MAX_DISTANCE`(`src/config.js`)に変換して `forceRadial` で制御。関連度が高いほど近い。小さい画面では自動で縮小
+- 中心からの距離: `match` を min-max 正規化したうえで平方根(`DISTANCE_CURVE = 0.5`)を通し、楕円半径に対する割合 `MIN_RADIUS_RATIO`〜`MAX_RADIUS_RATIO`(`src/config.js`)に変換。関連度が高いほど近い
+- 配置は画面に合わせた楕円: 入力欄(`INPUT_BAR_HEIGHT` + セーフエリア)を除いた領域に収め、`MAX_ASPECT`(初期値 1.5)で引き伸ばしを制限。自作の `forceEllipseRadial` で楕円に引き寄せ、ラベルは画面内・入力欄の上に収める。ウィンドウサイズ変更時に再計算
 - 角度: 円周を表示数で等分したスロットに、順位をシャッフルして割り当て(中心アーティスト名をシードにした疑似乱数なので、同じ検索は常に同じ配置)。スロット内のゆらぎは `ANGLE_JITTER`(0〜0.8)、距離のゆらぎは `DISTANCE_JITTER`(0〜0.1)
 - ノード識別子は `name`
 - 線は中心 → 周辺のみ描画(周辺同士の関連線は描画しない。デザイン上シンプルにするため)

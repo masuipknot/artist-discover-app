@@ -1,8 +1,21 @@
 import { useForceSimulation } from '../hooks/useForceSimulation.js';
-import { CENTER_FONT_SIZE, NODE_FONT_SIZE } from '../config.js';
+import {
+  CENTER_FONT_SIZE,
+  NODE_FONT_SIZE,
+  LABEL_OFFSET,
+  CENTER_LABEL_OFFSET,
+  CENTER_DOT_RADIUS,
+  NODE_DOT_RADIUS,
+} from '../config.js';
 
-export default function NetworkGraph({ graph, width, height, onSelectArtist }) {
-  const frame = useForceSimulation(graph, width, height);
+export default function NetworkGraph({
+  graph,
+  width,
+  height,
+  safeBottom,
+  onSelectArtist,
+}) {
+  const frame = useForceSimulation(graph, width, height, safeBottom);
 
   const positions = new Map(frame.nodes.map((n) => [n.id, n]));
 
@@ -40,14 +53,14 @@ export default function NetworkGraph({ graph, width, height, onSelectArtist }) {
             onClick={() => onSelectArtist(node.name)}
           >
             <circle
-              r={node.center ? 8 : 5}
+              r={node.center ? CENTER_DOT_RADIUS : NODE_DOT_RADIUS}
               fill={node.center ? 'var(--fg)' : 'var(--bg)'}
               stroke="var(--line-strong)"
               strokeWidth={1.5}
             />
             <text
               className="node-label"
-              y={node.center ? -18 : -14}
+              y={node.center ? -CENTER_LABEL_OFFSET : -LABEL_OFFSET}
               textAnchor="middle"
               fontSize={node.center ? CENTER_FONT_SIZE : NODE_FONT_SIZE}
               fontWeight={node.center ? 600 : 400}
