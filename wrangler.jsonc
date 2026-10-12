@@ -3,6 +3,10 @@
   "name": "artist-discover-app",
   "compatibility_date": "2026-10-12",
   "main": "./worker/index.js",
+  // Keep the app private until it is approved for release: no *.workers.dev
+  // address and no preview/version URLs, even after deploying.
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
