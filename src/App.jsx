@@ -44,17 +44,20 @@ export default function App() {
   const [graph, setGraph] = useState(null);
   const [loading, setLoading] = useState(false);
   const [center, setCenter] = useState(null);
+  const [error, setError] = useState(false);
 
   const selectArtist = useCallback(
     async (name) => {
       if (!name || name === center || loading) return;
       setLoading(true);
-      setCenter(name);
+      setError(false);
       try {
         const next = await buildNetwork(name);
         setGraph(next);
+        setCenter(name);
       } catch (err) {
         console.error(err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -82,7 +85,11 @@ export default function App() {
 
       {loading && <Loading />}
 
-      <SearchBar onSelectArtist={selectArtist} />
+      <SearchBar
+        onSelectArtist={selectArtist}
+        error={error}
+        onError={setError}
+      />
     </div>
   );
 }

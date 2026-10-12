@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "artist-discover-app",
+  "compatibility_date": "2026-10-12",
+  "main": "./worker/index.js",
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // Workers Cache: responses with Cache-Control are served from Cloudflare's
+  // cache without running the Worker (keyed by path + query string).
+  "cache": {
+    "enabled": true
+  }
+}

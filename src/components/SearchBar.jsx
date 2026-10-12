@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { searchArtists } from '../api/lastfm.js';
 
-export default function SearchBar({ onSelectArtist }) {
+export default function SearchBar({ onSelectArtist, error, onError }) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
@@ -18,15 +18,17 @@ export default function SearchBar({ onSelectArtist }) {
     debounceRef.current = setTimeout(async () => {
       try {
         const results = await searchArtists(trimmed);
+        onError(false);
         setSuggestions(results);
         setOpen(true);
       } catch {
         setSuggestions([]);
+        onError(true);
       }
     }, 250);
 
     return () => clearTimeout(debounceRef.current);
-  }, [query]);
+  }, [query, onError]);
 
   const handlePick = (name) => {
     setQuery('');
@@ -37,6 +39,11 @@ export default function SearchBar({ onSelectArtist }) {
 
   return (
     <div className="search-bar">
+      {error && (
+        <p className="error-message" role="alert">
+          読み込めませんでした。もう一度お試しください
+        </p>
+      )}
       {open && suggestions.length > 0 && (
         <ul className="suggestions">
           {suggestions.map((name) => (

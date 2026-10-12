@@ -1,5 +1,6 @@
 // Number of related artists shown around the center. Change this one value
-// (e.g. 10 / 15 / 20 / 30) to compare layouts; it feeds getSimilar's limit.
+// (e.g. 10 / 15 / 20 / 30) to compare layouts; it feeds getSimilar's limit
+// (the relay API accepts at most 50).
 export const RELATED_COUNT = 15;
 
 // Space the search bar takes from the bottom edge of the screen (px): the

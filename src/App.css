@@ -58,6 +58,13 @@
   outline: none;
 }
 
+.error-message {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .suggestions {
   list-style: none;
   margin: 0 0 8px;
